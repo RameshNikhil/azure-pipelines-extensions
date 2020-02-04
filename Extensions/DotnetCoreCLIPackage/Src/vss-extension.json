@@ -1,0 +1,163 @@
+{
+    "manifestVersion": 1.0,
+    "id": "github-packages",
+    "version": "15.145.1",
+    "name": "GitHub Package artifacts for Azure Pipelines",
+    "publisher": "ms-vscs",
+    "description": "Tools to manage github package artifacts for Azure Pipelines",
+    "_description.comment": "The below format to define artifact extensions is currently in preview and may change in future.",
+    "public": true,
+    "categories": [ "Build and release", "Pipelines" ],
+    "tags": [ "Artifacts", "DevOps", "Release", "Pipelines", "Azure" ],
+    "targets": [
+      {
+        "id": "Microsoft.VisualStudio.Services"
+      }
+    ],
+    "demands": [ "contribution/ms.vss-endpoint.github-endpoint-type" ],
+    "icons": {
+      "default": "vss_default.png"
+    },
+    "content": { 
+        "details": { 
+          "path": "readme.md" 
+        },
+        "license": {
+          "path": "mp_terms.md"
+        }
+      },
+    "repository": {
+          "type": "git",
+          "uri": "https://github.com/Microsoft/azure-pipelines-extensions/"
+    },
+    "branding": {
+        "color": "#5C2D91",
+        "theme": "dark"
+    },  
+    "contributions": [
+      {
+        "id": "github-package-artifact-type",
+        "description": "GitHub Package Artifact",
+        "_description.comment": "Don't Localize the word 'GitHub'",
+        "type": "ms.vss-releaseartifact.release-artifact-type",
+        "targets": [ "ms.vss-distributed-task.pipeline-artifact" ],
+        "properties": {
+          "name": "nuget",
+          "displayName": "GitHub Package",
+          "_displayName.comment": "Don't Localize the word 'GitHub'",
+          "endpointTypeId": "github",
+          "uniqueSourceIdentifier": "{{connection}}:{{project}}:{{name}}",
+          "downloadTaskId": "9fac244b-8d7c-4d8e-a003-2097daa3270f",
+          "artifactType": "Package",
+          "inputDescriptors": [
+            {
+              "id": "connection",
+              "name": "Service Endpoint",
+              "description": "Service Endpoint Id",
+              "inputMode": "Combo",
+              "isConfidential": false,
+              "hasDynamicValueInformation": true,
+              "validation": {
+                "isRequired": true,
+                "dataType": "string",
+                "maxLength": 300
+              }
+            },
+            {
+              "id": "definition",
+              "name": "Definition Name",
+              "description": "Name of the package",
+              "inputMode": "Combo",
+              "isConfidential": false,
+              "hasDynamicValueInformation": true,
+              "dependencyInputIds": [
+                "connection"
+              ],
+              "validation": {
+                "isRequired": true,
+                "dataType": "string",
+                "maxLength": 300
+              },
+              "properties": {
+                "isSearchable": true
+              }
+            },
+            {
+              "id": "name",
+              "name": "Package Name",
+              "description": "Name of the package",
+              "inputMode": "Combo",
+              "isConfidential": false,
+              "hasDynamicValueInformation": true,
+              "dependencyInputIds": [
+                "connection"
+              ],
+              "validation": {
+                "isRequired": true,
+                "dataType": "string",
+                "maxLength": 300
+              },
+              "properties": {
+                "isSearchable": true
+              }
+            },
+            {
+              "id": "version",
+              "name": "Version",
+              "description": "Version of the package to download",
+              "inputMode": "Combo",
+              "isConfidential": false,
+              "hasDynamicValueInformation": true,
+              "validation": {
+                "isRequired": false,
+                "dataType": "string",
+                "maxLength": 300
+              }
+            },
+            {
+              "id": "path",
+              "name": "Path",
+              "description": "Path, relative to the default working directory, where packages will be downloaded",
+              "inputMode": "Combo",
+              "isConfidential": false,
+              "hasDynamicValueInformation": true,
+              "validation": {
+                "isRequired": false,
+                "dataType": "string",
+                "maxLength": 300
+              }
+            }
+          ],
+          "taskInputMapping": {
+            "packagesDirectory": "{{{path}}}",
+            "externalEndpoints": "{{{connection}}}",
+            "packageName": "{{{name}}}",
+            "version": "{{{version}}}"
+          },
+          "dataSourceBindings": [
+              {
+                "target": "createwebhook",
+                "endpointUrl": "{{{endpoint.url}}}/repos/{{{owner}}}/{{{repo}}}/hooks",
+                "requestVerb": "Post",
+                "requestContent": "{\"name\":\"web\", \"events\": [\"package\"], \"config\": {\"url\": \"{{{payloadUrl}}}\", \"secret\":\"{{{secret}}}\", \"content-type\": \"json\"}, \"active\": \"true\"}",
+                "resultSelector": "jsonpath:$"
+              },
+              {
+                  "target": "deletewebhook",
+                  "endpointUrl": "{{{endpoint.url}}}/repos/{{{owner}}}/{{{repo}}}/hooks/{{{hookId}}}",
+                  "requestVerb": "Delete",
+                  "resultSelector": "jsonpath:$"
+              },
+              {
+                  "target": "listwebhook",
+                  "endpointUrl": "{{{endpoint.url}}}/repos/{{{owner}}}/{{{repo}}}/hooks",
+                  "requestVerb": "Get",
+                  "resultSelector": "jsonpath:$",
+                  "resultTemplate": "{ \"value\" : \"{{{ id }}}\", \"displayValue\" : \"{{{ name }}}\" }"
+            }
+          ]
+        }
+      }
+    ]
+  }
+  
